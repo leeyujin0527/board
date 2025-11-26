@@ -69,6 +69,9 @@ class BoardServiceTest {
 
     @Test
     void deleteBoard() {
+        boardRepository.deleteAll();
+        List<Board> boards = boardService.findAllBoard();
+        assertThat(boards).hasSize(0);
     }
 
     @Test
