@@ -1,6 +1,7 @@
 package com.dgsw.board.service;
 
 import com.dgsw.board.dto.Request.BoardCreateRequest;
+import com.dgsw.board.dto.Request.BoardUpdateRequest;
 import com.dgsw.board.dto.Response.BoardResponse;
 import com.dgsw.board.entity.Board;
 import com.dgsw.board.repository.BoardRepository;
@@ -64,18 +65,74 @@ class BoardServiceTest {
     }
 
     @Test
+    @DisplayName("게시글 제목 검색 테스트")
     void searchByTitle() {
+        boardRepository.deleteAll();
+        boardRepository.save(new Board(
+                "Spring 테스트",
+                "내용1",
+                "작성자1",
+                LocalDateTime.now(),
+                "file1.txt"
+        ));
+        boardRepository.save(new Board(
+                "JUnit 테스트",
+                "내용2",
+                "작성자2",
+                LocalDateTime.now(),
+                "file2.txt"
+        ));
+
+        List<Board> results = boardService.searchByTitle("Spring");
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getTitle()).isEqualTo("Spring 테스트");
     }
 
     @Test
+    @DisplayName("게시글 삭제 테스트")
     void deleteBoard() {
         boardRepository.deleteAll();
+        Board board = boardRepository.save(new Board(
+                "삭제 테스트",
+                "내용",
+                "작성자",
+                LocalDateTime.now(),
+                "file.txt"
+        ));
+
+        boardService.deleteBoard(board.getId());
+
         List<Board> boards = boardService.findAllBoard();
-        assertThat(boards).hasSize(0);
+        assertThat(boards).isEmpty();
     }
 
     @Test
+    @DisplayName("게시글 수정 테스트")
     void updateBoard() {
+        boardRepository.deleteAll();
+        Board board = boardRepository.save(new Board(
+                "수정 전 제목",
+                "수정 전 내용",
+                "작성자",
+                LocalDateTime.now(),
+                "file.txt"
+        ));
+
+        // BoardUpdateRequest 사용
+        BoardUpdateRequest updateRequest = new BoardUpdateRequest(
+                "수정 후 제목",
+                "수정 후 내용",
+                "작성자",
+                LocalDateTime.now(),
+                "fileUpdated.txt"
+        );
+
+        BoardResponse updated = boardService.updateBoard(board.getId(), updateRequest);
+
+        assertThat(updated.getTitle()).isEqualTo("수정 후 제목");
+        assertThat(updated.getContent()).isEqualTo("수정 후 내용");
+        assertThat(updated.getFileName()).isEqualTo("fileUpdated.txt");
     }
+
 
 }
